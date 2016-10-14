@@ -13,9 +13,11 @@ class tracker():
         self.relative_position = Twist()
         self.relative_position.linear.x = 0
         self.relative_position.linear.y = 0
-        self.sub = rospy.Subscriber("relativePosition", Twist, self.relative_position_subscriber_callback)
+        self.sub = rospy.Subscriber("/ros_cmt_tracker/output/twist", Twist, self.relative_position_subscriber_callback)
         self.drone = DJIDrone()
         self.drone.request_sdk_permission_control()
+	self.previous_position = Twist()
+	self.isFirstFrame = True
         time.sleep(1)
         print "[INFO] Starting to tracking"
         print "[INFO] Taking off after 5 seconds"
@@ -25,7 +27,7 @@ class tracker():
         time.sleep(6)
         print "[INFO] Moving upwards to 10 meters"
 
-        self.drone.local_position_navigation_send_request(0,0,10)
+        self.drone.local_position_navigation_send_request(0,0,5)
 
         while 1:
             if not self.drone.local_position_navigation_action_client.get_result():
@@ -41,24 +43,37 @@ class tracker():
         self.relative_position = relativePosition
 
     def main(self):
-        rate = rospy.Rate(50)
+        rate = rospy.Rate(20)
 
         while not rospy.is_shutdown():
 #	    self.drone.request_sdk_permission_control()
+	    if not self.isFirstFrame and self.previous_position.linear.x == self.relative_position.linear.x and self.previous_position.linear.y == self.relative_position.linear.y:
+		self.drone.attitude_control(0x4A, 0, 0, 0, 0)
+		print "[Warning] Same with previous frame. Maybe data transmassion too slow, or object failed to detect."
+		rate.sleep()
+		continue
+
+	    if self.isFirstFrame:
+		self.isFirstFrame = False
+	    self.previous_position = self.relative_position
+
+	    myScale = 80.0
+	    relative_pos_x = -self.relative_position.linear.y / myScale
+	    relative_pos_y = self.relative_position.linear.x / myScale
             vel_x = 0
             vel_y = 0
-            if self.relative_position.linear.x > 4:
-	        vel_x = 4
-            elif self.relative_position.linear.x < -4:
-	        vel_x = -4
+            if relative_pos_x > 3:
+	        vel_x = 3
+            elif relative_pos_x < -3:
+	        vel_x = -3
 	    else:
-		vel_x = self.relative_position.linear.x
-            if self.relative_position.linear.y > 4:
-	        vel_y = 4
-            elif self.relative_position.linear.y < -4:
-	        vel_y = -4
+		vel_x = relative_pos_x
+            if relative_pos_y > 3:
+	        vel_y = 3
+            elif relative_pos_y < -3:
+	        vel_y = -3
 	    else:
-		vel_y = self.relative_position.linear.y
+		vel_y = relative_pos_y
             self.drone.attitude_control(0x4A, vel_x, vel_y, 0, 0)
             rate.sleep()
 
@@ -71,4 +86,5 @@ if __name__ == '__main__':
         myTracker.main()
     except rospy.ROSInterruptException:
         pass
+
 

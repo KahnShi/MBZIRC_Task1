@@ -177,7 +177,10 @@ catkin_install_python(PROGRAMS script/keepTracking.py
 
 catkin_install_python(PROGRAMS script/publishRelativePosition.py
 					DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-## Mark cpp header files for installation
+
+catkin_install_python(PROGRAMS script/move_relative_coordinate.py
+					DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+ ## Mark cpp header files for installation
 
 #install(DIRECTORY launch
 #  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
