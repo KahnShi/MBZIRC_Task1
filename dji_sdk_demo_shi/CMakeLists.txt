@@ -9,7 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   dji_sdk
   rospy
   geometry_msgs
-  #message_generation
+  std_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -178,7 +178,10 @@ catkin_install_python(PROGRAMS script/keepTracking.py
 catkin_install_python(PROGRAMS script/publishRelativePosition.py
 					DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-catkin_install_python(PROGRAMS script/move_relative_coordinate.py
+catkin_install_python(PROGRAMS script/move_relative_coordinate.py					 DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+
+catkin_install_python(PROGRAMS script/relative_position_calculation.py
 					DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
  ## Mark cpp header files for installation
 
