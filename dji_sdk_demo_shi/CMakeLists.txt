@@ -4,13 +4,23 @@ project(dji_sdk_demo_shi)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+
+message(STATUS "Found OpenCV: ${OpenCV_LIBS}")
+find_package(OpenCV 3.1 REQUIRED)
+
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   dji_sdk
   rospy
   geometry_msgs
   std_msgs
+  cv_bridge
+  image_transport
+  sensor_msgs
 )
+
+include_directories(${OpenCV_INCLUDE_DIRS})
+
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -131,16 +141,14 @@ include_directories(
 # add_dependencies(dji_sdk_demo ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-# add_executable(dji_sdk_demo_node src/dji_sdk_demo_node.cpp)
+add_executable(tracking_red_region_node src/tracking_red_region.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(dji_sdk_demo_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(dji_sdk_demo_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(tracking_red_region_node  ${catkin_LIBRARIES} ${OpenCV_LIBS})
 #add_executable(dji_sdk_client src/client.cpp)
 #target_link_libraries(dji_sdk_client
 #  ${catkin_LIBRARIES}
@@ -181,8 +189,15 @@ catkin_install_python(PROGRAMS script/publishRelativePosition.py
 catkin_install_python(PROGRAMS script/move_relative_coordinate.py					 DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 
-catkin_install_python(PROGRAMS script/relative_position_calculation.py
+catkin_install_python(PROGRAMS script/detecting_red_region.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+catkin_install_python(PROGRAMS script/tracking_red_region.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+catkin_install_python(PROGRAMS script/test_velocity_control_api.py
 					DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
  ## Mark cpp header files for installation
 
 #install(DIRECTORY launch
