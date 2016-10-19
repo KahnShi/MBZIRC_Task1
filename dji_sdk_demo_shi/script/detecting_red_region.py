@@ -15,7 +15,7 @@ class image_converter:
     #rospy.init_node('relative_pixel_position', anonymous=True)
     self.image_pub = rospy.Publisher("image_with_target",Image)
     self.bridge = CvBridge()
-    self.image_sub = rospy.Subscriber("/camera/left/image_rect_color",Image,self.callback)
+    self.image_sub = rospy.Subscriber("/camera/left/rgb/image_rect",Image,self.callback)
     self.position_pub = rospy.Publisher('relative_pixel_position', Twist, queue_size = 10)
     
   def callback(self,data):
@@ -49,16 +49,16 @@ class image_converter:
 
     pubTwist = Twist()
     if len(large_contours) == 0:
-      pubTwist.linear.x = 0
-      pubTwist.linear.y = 0
+      pubTwist.linear.x = -1
+      pubTwist.linear.y = -1
       pubTwist.linear.z = 0
     else:
       select_contour_index = contour_area_set.index(max(contour_area_set))
       #print center_set[select_contour_index][0] #x
       #print center_set[select_contour_index][1] #y
       #print "***"
-      pixel_bias_x = center_set[select_contour_index][0] - cv_image.shape[1] / 2
-      pixel_bias_y = center_set[select_contour_index][1] - cv_image.shape[0] / 2
+      pixel_bias_x = center_set[select_contour_index][0]
+      pixel_bias_y = center_set[select_contour_index][1]
       pubTwist.linear.x = pixel_bias_x
       pubTwist.linear.y = pixel_bias_y
       pubTwist.linear.z = 1
