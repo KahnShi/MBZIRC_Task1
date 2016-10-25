@@ -180,17 +180,13 @@ class tracker:
                 if self.relative_position.linear.x == -1:
                     self.state_machine_ = 1
                 else:
-                    if is_lookdown_ultrasonic_reliable:
-                        if abs(self.relative_position.linear.x - self.camera_c_x) < self.camera_c_x and abs(self.relative_position.linear.y - self.camera_c_y) < self.camera_c_y:
-                            self.state_machine_ = 5
-                    else:
+                    if not is_lookdown_ultrasonic_reliable:
                         self.state_machine_ = 2
                        
             if self.state_machine_ <= 2:
                 uav_coordinate_relative_z = uav_coordinate_relative_z_odometry
             else:
                 uav_coordinate_relative_z = uav_coordinate_relative_z_ultrasonic
-
                 
             uav_coordinate_relative_pos = []
             if self.state_machine_ == 1:
@@ -204,6 +200,9 @@ class tracker:
                 uav_coordinate_relative_pos.append(uav_coordinate_relative_z)
                 ## uav_control_coordinate means the frame we mentioned above
                 uav_control_coordinate_relative_pos = rotation_info.get_coordinate_after_rotation(uav_coordinate_relative_pos)
+
+                if abs(uav_control_coordinate_relative_pos[0]) < 0.2 and abs(uav_control_coordinate_relative_pos[1]) < 0.2:
+                    self.state_machine_ = 5
                     
                 vel_x = 0
                 vel_y = 0
@@ -223,7 +222,7 @@ class tracker:
                 if self.state_machine_ == 2:
                     control_velocity.linear.x = vel_x/2
                     control_velocity.linear.y = vel_y/2
-                    if vel_x > 0.8 * self.uav_maximum_velocity_ or vel_y > 0.8 * self.uav_maximum_velocity_:
+                    if self.relative_position.linear.x/(2*self.camera_c_x) < 0.1 or self.relative_position.linear.x/(2*self.camera_c_x) > 0.9 or self.relative_position.linear.y/(2*self.camera_c_y) < 0.1 or self.relative_position.linear.y/(2*self.camera_c_y) > 0.9:
                         control_velocity.linear.z = 0
                     else:
                         control_velocity.linear.z = -0.2
@@ -231,7 +230,7 @@ class tracker:
                 elif self.state_machine_ == 3:
                     control_velocity.linear.x = vel_x/2
                     control_velocity.linear.y = vel_y/2
-                    if vel_x > 0.8 * self.uav_maximum_velocity_ or vel_y > 0.8 * self.uav_maximum_velocity_:
+                    if self.relative_position.linear.x/(2*self.camera_c_x) < 0.1 or self.relative_position.linear.x/(2*self.camera_c_x) > 0.9 or self.relative_position.linear.y/(2*self.camera_c_y) < 0.1 or self.relative_position.linear.y/(2*self.camera_c_y) > 0.9:
                         control_velocity.linear.z = 0
                     else:
                         control_velocity.linear.z = -0.2
@@ -242,9 +241,10 @@ class tracker:
                     control_velocity.linear.z = 0
                     self.drone.velocity_control(0, control_velocity.linear.x, control_velocity.linear.y, control_velocity.linear.z, 0)
                 elif self.state_machine_ == 5:
+                    ## Todo: Whether to use previous speed for landing
                     control_velocity.linear.x = vel_x/2
                     control_velocity.linear.y = vel_y/2
-                    control_velocity.linear.z = -0.6
+                    control_velocity.linear.z = -1
                     for i in range(0, 100):
                         self.drone.velocity_control(0, control_velocity.linear.x, control_velocity.linear.y, control_velocity.linear.z, 0)
                         time.sleep(0.02)
