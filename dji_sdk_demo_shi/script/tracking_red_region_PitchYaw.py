@@ -175,10 +175,12 @@ class tracker:
             diff_pos[0] = uav_control_coordinate_relative_pos[0]
             diff_pos[1] = uav_control_coordinate_relative_pos[1]
             diff_dis = math.sqrt(diff_pos[0] ** 2 + diff_pos[1] ** 2)
-            if diff_pos[0] < 0.2 and diff_pos[1] < 0.2:
+            if diff_pos[0] < 0.1 and diff_pos[1] < 0.1:
                 print "Mission finished."
                 self.drone.attitude_control(0x4B, 0, 0, 0, 0)
-            yaw_diff = math.atan(abs(diff_pos[1]/diff_pos[0]))/math.pi * 180.0
+            yaw_diff = math.atan2(diff_pos[1], diff_pos[0])/math.pi * 180.0
+
+            """
             if diff_pos[0] >= 0:
                 if diff_pos[1] < 0:
                     yaw_diff = -yaw_diff
@@ -187,10 +189,10 @@ class tracker:
                     yaw_diff = yaw_diff + 90.0
                 else:
                     yaw_diff = - (yaw_diff + 90.0)
-
+            """
 
             if abs(yaw_diff - self.target_relative_angle_) > 2.0*math.pi/3.0:
-                if diff_dis < 0.35:
+                if diff_dis < 0.25:
                     diff_dis = -diff_dis
                     if abs(yaw_diff-self.target_relative_angle_-180) < abs(yaw_diff-self.target_relative_angle_+180):
                         self.target_relative_angle_ = yaw_diff - 180
@@ -202,8 +204,10 @@ class tracker:
                 self.target_relative_angle_ = yaw_diff
             
             if diff_dis > 1:
-                diff_dis = 1
-                
+                diff_dis = 0.5
+            else:
+                diff_dis /= 2
+            
             #0x43
             self.drone.attitude_control(0x43, diff_dis, 0, 0, self.target_relative_angle_)
             control_velocity.linear.x = diff_dis

@@ -153,22 +153,24 @@ class tracker:
                 
             vel_x = 0
             vel_y = 0
-            if uav_control_coordinate_relative_pos[0] > 1:
-	        vel_x = 1
-            elif uav_control_coordinate_relative_pos[0] < -1:
-	        vel_x = -1
+            if uav_control_coordinate_relative_pos[0] > 5:
+	        vel_x = 5
+            elif uav_control_coordinate_relative_pos[0] < -5:
+	        vel_x = -5
 	    else:
 		vel_x = uav_control_coordinate_relative_pos[0]
-            if uav_control_coordinate_relative_pos[1] > 1:
-	        vel_y = 1
-            elif uav_control_coordinate_relative_pos[1] < -1:
-	        vel_y = -1
+            if uav_control_coordinate_relative_pos[1] > 5:
+	        vel_y = 5
+            elif uav_control_coordinate_relative_pos[1] < -5:
+	        vel_y = -5
 	    else:
 		vel_y = uav_control_coordinate_relative_pos[1]
             #self.drone.attitude_control(0x4A, vel_x, vel_y, 0, 0)
-            self.drone.velocity_control(0, vel_x / 2.0, vel_y /2.0 , 0, 0)
-            control_velocity.linear.x = vel_x / 2
-            control_velocity.linear.y = vel_y / 2
+            p_gain = 6
+            
+            self.drone.velocity_control(0, vel_x / p_gain, vel_y / p_gain , 0, 0)
+            control_velocity.linear.x = vel_x / p_gain
+            control_velocity.linear.y = vel_y / p_gain
             self.publisher_velocity.publish(control_velocity)
 
             ## for test

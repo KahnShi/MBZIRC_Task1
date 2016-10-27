@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+
+  ############## DJI SDK bringup #############################
+  <node pkg="dji_sdk_demo_shi" type="detecting_red_region.py" name="detecting_red_region" output="screen" />
+  <node pkg="dji_sdk_demo_shi" type="tracking_landing_indoor_region.py" name="tracking_landing_indoor_region" output="screen" >
+    <param name="state_machine" value="true" />
+  </node>
+</launch>

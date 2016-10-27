@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>	
+
+    <node pkg="dji_sdk_demo_shi" type="tracking_landing_indoor_region.py" name="tracking_landing_indoor_region" output="screen" >
+      <param name="state_machine" value="true" />
+      <remap from="/relative_pixel_position" to="/kcf/output/twist" />
+  </node>
+
+</launch>

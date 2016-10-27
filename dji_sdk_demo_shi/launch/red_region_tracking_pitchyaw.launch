@@ -4,6 +4,6 @@
   ############################# Red Region Detection ##########################################
   <node pkg="dji_sdk_demo_shi" type="detecting_red_region.py" name="detecting_red_region" output="screen" />
   ############################ Tracking
-  <node pkg="dji_sdk_demo_shi" type="tracking_red_region.py" name="tracking_red_region" output="screen" />
+  <node pkg="dji_sdk_demo_shi" type="tracking_red_region_PitchYaw.py" name="tracking_red_region" output="screen" />
 
 </launch>

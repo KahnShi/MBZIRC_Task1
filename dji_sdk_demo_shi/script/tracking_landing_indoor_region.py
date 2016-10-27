@@ -78,8 +78,8 @@ class tracker:
         ## 5: When target is in central area of picture, which means could force landing; 6: Rely on ultrasonic, but it is not reliable at this time
         ## 0: Successfully landing
         self.state_machine_ = 1
-        self.odometry_reliable_height_lowerbound_ = 1
-        self.force_landing_height_upperbound_ = 0.8
+        self.odometry_reliable_height_lowerbound_ = 2
+        self.force_landing_height_upperbound_ = 1.5
 
         ## Krish's output
         #self.sub = rospy.Subscriber("/ros_cmt_tracker/output/twist", Twist, self.relative_position_subscriber_callback)
@@ -201,23 +201,23 @@ class tracker:
                 ## uav_control_coordinate means the frame we mentioned above
                 uav_control_coordinate_relative_pos = rotation_info.get_coordinate_after_rotation(uav_coordinate_relative_pos)
 
-                if abs(uav_control_coordinate_relative_pos[0]) < 0.2 and abs(uav_control_coordinate_relative_pos[1]) < 0.2:
+                if abs(uav_control_coordinate_relative_pos[0]) < 0.15 and abs(uav_control_coordinate_relative_pos[1]) < 0.15:
                     self.state_machine_ = 5
                     
                 vel_x = 0
                 vel_y = 0
-                if uav_control_coordinate_relative_pos[0] > 1:
-	            vel_x = 1
-                elif uav_control_coordinate_relative_pos[0] < -1:
-	            vel_x = -1
+                if uav_control_coordinate_relative_pos[0] > 2:
+	            vel_x = 2
+                elif uav_control_coordinate_relative_pos[0] < -2:
+	            vel_x = -2
 	        else:
 		    vel_x = uav_control_coordinate_relative_pos[0]
-                    if uav_control_coordinate_relative_pos[1] > 1:
-	                vel_y = 1
-                    elif uav_control_coordinate_relative_pos[1] < -1:
-	                vel_y = -1
-	            else:
-	                vel_y = uav_control_coordinate_relative_pos[1]
+                if uav_control_coordinate_relative_pos[1] > 2:
+	            vel_y = 2
+                elif uav_control_coordinate_relative_pos[1] < -2:
+	            vel_y = -2
+	        else:
+	            vel_y = uav_control_coordinate_relative_pos[1]
                         
                 if self.state_machine_ == 2:
                     control_velocity.linear.x = vel_x/2
@@ -244,7 +244,7 @@ class tracker:
                     ## Todo: Whether to use previous speed for landing
                     control_velocity.linear.x = vel_x/2
                     control_velocity.linear.y = vel_y/2
-                    control_velocity.linear.z = -1
+                    control_velocity.linear.z = -2
                     for i in range(0, 100):
                         self.drone.velocity_control(0, control_velocity.linear.x, control_velocity.linear.y, control_velocity.linear.z, 0)
                         time.sleep(0.02)
