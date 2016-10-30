@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>	
+TODO					
+
+<include file="$(find kernelized_correlation_filters)/launch/kernelized_correlation_filters.launch" />
+
+
+<node pkg="dji_sdk_demo_shi" type="tracking_red_region.py" name="tracking_red_region" output="screen" >
+  	<remap from="/relative_pixel_position" to="/kcf/output/twist" />
+  </node>
+
+</launch>

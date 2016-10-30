@@ -7,16 +7,16 @@ from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import numpy as np
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import PointStamped
 
 class image_converter:
 
   def __init__(self):
     #rospy.init_node('relative_pixel_position', anonymous=True)
-    self.image_pub = rospy.Publisher("image_with_target",Image)
+    self.image_pub = rospy.Publisher("image_with_target",Image, queue_size = 10)
     self.bridge = CvBridge()
     self.image_sub = rospy.Subscriber("/camera/left/rgb/image_rect",Image,self.callback)
-    self.position_pub = rospy.Publisher('relative_pixel_position', Twist, queue_size = 10)
+    self.position_pub = rospy.Publisher('/object_image_center', PointStamped, queue_size = 10)
     
   def callback(self,data):
     try:
@@ -47,11 +47,12 @@ class image_converter:
     #print cv_image.shape[0] #720 #y_max
     #print cv_image.shape[1] #1280 #x_max
 
-    pubTwist = Twist()
+    pubPoint = PointStamped()
+    pubPoint.header.stamp = rospy.Time.now()
     if len(large_contours) == 0:
-      pubTwist.linear.x = -1
-      pubTwist.linear.y = -1
-      pubTwist.linear.z = 0
+      pubPoint.point.x = -1
+      pubPoint.point.y = -1
+      pubPoint.point.z = 0
     else:
       select_contour_index = contour_area_set.index(max(contour_area_set))
       #print center_set[select_contour_index][0] #x
@@ -59,9 +60,9 @@ class image_converter:
       #print "***"
       pixel_bias_x = center_set[select_contour_index][0]
       pixel_bias_y = center_set[select_contour_index][1]
-      pubTwist.linear.x = pixel_bias_x
-      pubTwist.linear.y = pixel_bias_y
-      pubTwist.linear.z = 1
+      pubPoint.point.x = pixel_bias_x
+      pubPoint.point.y = pixel_bias_y
+      pubPoint.point.z = 1
       
             
     #print len(large_contours)
@@ -70,7 +71,7 @@ class image_converter:
     #cv2.imshow("Image window", cv_image)
     #cv2.waitKey(3)
     
-    self.position_pub.publish(pubTwist)
+    self.position_pub.publish(pubPoint)
     self.image_pub.publish(self.bridge.cv2_to_imgmsg(cv_image, "bgr8"))
 
 

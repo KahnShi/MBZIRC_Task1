@@ -151,57 +151,48 @@ class tracker:
             
                 ## uav_control_coordinate means the frame we mentioned above
                 uav_control_coordinate_relative_pos = rotation_info.get_coordinate_after_rotation(uav_coordinate_relative_pos)
-                
-            # vel_x = 0
-            # vel_y = 0
-            # if uav_control_coordinate_relative_pos[0] > 1:
-	    #     vel_x = 1
-            # elif uav_control_coordinate_relative_pos[0] < -1:
-	    #     vel_x = -1
-	    # else:
-	    #     vel_x = uav_control_coordinate_relative_pos[0]
-            # if uav_control_coordinate_relative_pos[1] > 1:
-	    #     vel_y = 1
-            # elif uav_control_coordinate_relative_pos[1] < -1:
-	    #     vel_y = -1
-	    # else:
-	    #     vel_y = uav_control_coordinate_relative_pos[1]
-            # ##self.drone.attitude_control(0x4B, vel_x, vel_y, 0, 0)
-            # self.drone.velocity_control(0, vel_x / 2.0, vel_y /2.0 , 0, 0)
-            # control_velocity.linear.x = vel_x / 2
-            # control_velocity.linear.y = vel_y / 2
 
+            print uav_control_coordinate_relative_pos
+            
             diff_pos = [0,0]
             diff_pos[0] = uav_control_coordinate_relative_pos[0]
             diff_pos[1] = uav_control_coordinate_relative_pos[1]
             diff_dis = math.sqrt(diff_pos[0] ** 2 + diff_pos[1] ** 2)
-            if diff_pos[0] < 0.1 and diff_pos[1] < 0.1:
-                print "Mission finished."
-                self.drone.attitude_control(0x4B, 0, 0, 0, 0)
+            if abs(diff_pos[0]) < 0.2 and abs(diff_pos[1]) < 0.2:
+                if  self.relative_position.linear.x == -1:
+                    print "Target lost"
+                else:
+                    print "Mission finished."
+                #self.drone.attitude_control(0x4B, 0, 0, 0, 0)
+                self.drone.velocity_control(0, 0, 0, 0, 0)
+                rate.sleep()
+                continue
+
             yaw_diff = math.atan2(diff_pos[1], diff_pos[0])/math.pi * 180.0
+            
+            # if diff_pos[0] >= 0:
+            #     if diff_pos[1] < 0:
+            #         yaw_diff = -yaw_diff
+            # else:
+            #     if diff_pos[1] >= 0:
+            #         yaw_diff = yaw_diff + 90.0
+            #     else:
+            #         yaw_diff = - (yaw_diff + 90.0)
+            
 
-            """
-            if diff_pos[0] >= 0:
-                if diff_pos[1] < 0:
-                    yaw_diff = -yaw_diff
-            else:
-                if diff_pos[1] >= 0:
-                    yaw_diff = yaw_diff + 90.0
-                else:
-                    yaw_diff = - (yaw_diff + 90.0)
-            """
+            # if abs(yaw_diff - self.target_relative_angle_) > 120:
+            #     if diff_dis < 0.25:
+            #         diff_dis = -diff_dis
+            #         if abs(yaw_diff-self.target_relative_angle_-180) < abs(yaw_diff-self.target_relative_angle_+180):
+            #             self.target_relative_angle_ = yaw_diff - 180
+            #         else:
+            #             self.target_relative_angle_ = yaw_diff + 180
+            #     else:
+            #         self.target_relative_angle_ = yaw_diff
+            # else:
+            #     self.target_relative_angle_ = yaw_diff
 
-            if abs(yaw_diff - self.target_relative_angle_) > 2.0*math.pi/3.0:
-                if diff_dis < 0.25:
-                    diff_dis = -diff_dis
-                    if abs(yaw_diff-self.target_relative_angle_-180) < abs(yaw_diff-self.target_relative_angle_+180):
-                        self.target_relative_angle_ = yaw_diff - 180
-                    else:
-                        self.target_relative_angle_ = yaw_diff + 180
-                else:
-                    self.target_relative_angle_ = yaw_diff
-            else:
-                self.target_relative_angle_ = yaw_diff
+            self.target_relative_angle_ = yaw_diff
             
             if diff_dis > 1:
                 diff_dis = 0.5
@@ -209,7 +200,8 @@ class tracker:
                 diff_dis /= 2
             
             #0x43
-            self.drone.attitude_control(0x43, diff_dis, 0, 0, self.target_relative_angle_)
+            self.drone.attitude_control(0x4B, diff_dis/2, 0, 0, self.target_relative_angle_ / 1.5)
+            #self.drone.attitude_control(0x4B, 0, 0, 0, self.target_relative_angle_ / 2)
             control_velocity.linear.x = diff_dis
             control_velocity.angular.z = self.target_relative_angle_
             

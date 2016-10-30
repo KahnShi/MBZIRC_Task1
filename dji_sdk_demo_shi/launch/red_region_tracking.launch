@@ -1,9 +1,13 @@
 <?xml version="1.0"?>
 <launch>
+  <arg name="dji" default="True" />
   
   ############################# Red Region Detection ##########################################
   <node pkg="dji_sdk_demo_shi" type="detecting_red_region.py" name="detecting_red_region" output="screen" />
-  ############################ Tracking
-  <node pkg="dji_sdk_demo_shi" type="tracking_red_region.py" name="tracking_red_region" output="screen" />
-
+  ############################ Tracking ######################################################
+  
+  <node pkg="dji_sdk_demo_shi" type="tracking_control.py" name="tracking_control" output="screen" args = "$(arg dji)">
+    <param name="uav_odom_sub_topic_name" value="/dji_sdk/odometry" />
+    <param name="max_control_vel" value="1.0" />
+  </node>
 </launch>
